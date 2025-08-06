@@ -16,8 +16,8 @@ import {
   RewardCard,
   ErrorBoundary,
   PersonFormContent,
-  ChoreForm,
-  RewardForm,
+  ChoreFormContent,
+  RewardFormContent,
   ConfirmDialog,
 } from "../components";
 
@@ -328,15 +328,16 @@ const Settings: React.FC = () => {
         onClose={() => setShowChoreForm(false)}
         title="Add Chore"
       >
-        <ChoreForm
-          isOpen={showChoreForm}
-          onClose={() => setShowChoreForm(false)}
-          onSubmit={async (data) => {
-            await addChore(data);
-            setShowChoreForm(false);
-          }}
-          persons={persons}
-        />
+        <ErrorBoundary>
+          <ChoreFormContent
+            onSubmit={async (data) => {
+              await addChore(data);
+              setShowChoreForm(false);
+            }}
+            onCancel={() => setShowChoreForm(false)}
+            persons={persons}
+          />
+        </ErrorBoundary>
       </Modal>
 
       {/* Add Reward Modal */}
@@ -345,15 +346,16 @@ const Settings: React.FC = () => {
         onClose={() => setShowRewardForm(false)}
         title="Add Reward"
       >
-        <RewardForm
-          isOpen={showRewardForm}
-          onClose={() => setShowRewardForm(false)}
-          onSubmit={async (data) => {
-            await addReward(data);
-            setShowRewardForm(false);
-          }}
-          persons={persons}
-        />
+        <ErrorBoundary>
+          <RewardFormContent
+            onSubmit={async (data) => {
+              await addReward(data);
+              setShowRewardForm(false);
+            }}
+            onCancel={() => setShowRewardForm(false)}
+            persons={persons}
+          />
+        </ErrorBoundary>
       </Modal>
 
       {/* Delete Confirmation */}

@@ -19,6 +19,8 @@ export { default as RewardCard } from "./cards/RewardCard";
 // Form Components
 export { default as PersonForm } from "./forms/PersonForm";
 export { default as PersonFormContent } from "./forms/PersonFormContent";
+export { default as ChoreFormContent } from "./forms/ChoreFormContent";
+export { default as RewardFormContent } from "./forms/RewardFormContent";
 export { default as ChoreForm } from "./forms/ChoreForm";
 export { default as RewardForm } from "./forms/RewardForm";
 
