@@ -40,14 +40,14 @@ const Layout = () => {
                 >
                   History
                 </Link>
-                {user?.is_admin && (
+                {user?.is_admin ? (
                   <Link
                     to="/settings"
                     className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                   >
                     Settings
                   </Link>
-                )}
+                ) : null}
               </nav>
 
               <div className="flex items-center space-x-3">

@@ -31,7 +31,7 @@ const PersonCard: React.FC<PersonCardProps> = ({
           </p>
           <p className="text-sm text-gray-500">
             {person.points} points
-            {person.is_admin && " • Admin"}
+            {person.is_admin ? " • Admin" : ""}
           </p>
         </div>
       </div>

@@ -14,7 +14,7 @@ dotenv.config();
 import choreRoutes from "./routes/choreRoutes";
 import personRoutes from "./routes/personRoutes";
 import rewardRoutes from "./routes/rewardRoutes";
-import authRoutes from "./routes/authRoutes";
+import authRoutes, { verifyToken } from "./routes/authRoutes";
 import activityRoutes from "./routes/activityRoutes";
 import settingsRoutes from "./routes/settingsRoutes";
 import setupRoutes from "./routes/setupRoutes";
@@ -25,34 +25,33 @@ import { initializeDatabase } from "./utils/database";
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Rate limiting
+// Rate limiting - more permissive for local development
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 1000, // Much higher limit for local development
   message: "Too many requests from this IP, please try again later.",
+  skip: (req) => {
+    // Skip rate limiting for localhost in development
+    const isLocalhost =
+      req.hostname === "localhost" || req.hostname === "127.0.0.1";
+    return process.env.NODE_ENV === "development" && isLocalhost;
+  },
 });
 
 // Middleware
-app.use(helmet());
-app.use(compression());
-app.use(limiter);
-
-// CORS configuration - must be before other middleware
+// CORS must be first to handle preflight requests
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://127.0.0.1:5173",
-      process.env.CORS_ORIGIN || "http://localhost:5173",
-    ],
+    origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// Handle preflight requests
-app.options("*", cors());
+app.use(helmet());
+app.use(compression());
+app.use(limiter);
 
 app.use(morgan("combined"));
 app.use(express.json());
@@ -64,11 +63,11 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 // API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/setup", setupRoutes);
-app.use("/api/chores", choreRoutes);
-app.use("/api/persons", personRoutes);
-app.use("/api/rewards", rewardRoutes);
-app.use("/api/activities", activityRoutes);
-app.use("/api/settings", settingsRoutes);
+app.use("/api/chores", verifyToken, choreRoutes);
+app.use("/api/persons", verifyToken, personRoutes);
+app.use("/api/rewards", verifyToken, rewardRoutes);
+app.use("/api/activities", verifyToken, activityRoutes);
+app.use("/api/settings", verifyToken, settingsRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {

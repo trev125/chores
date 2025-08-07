@@ -163,14 +163,30 @@ router.put("/:id", async (req, res) => {
 });
 
 // Complete chore
-router.post("/:id/complete", async (req, res) => {
+router.post("/:id/complete", async (req: any, res) => {
   try {
     const { id } = req.params;
+    const userId = req.user.id;
 
     // Get the chore
     const chore = await db.get("SELECT * FROM chores WHERE id = ?", [id]);
     if (!chore) {
       return res.status(404).json({ error: "Chore not found" });
+    }
+
+    if (chore.completed) {
+      return res.status(400).json({ error: "Chore already completed" });
+    }
+
+    // Check if user is admin or if the chore is assigned to them
+    const user = await db.get("SELECT * FROM persons WHERE id = ?", [userId]);
+    const isAdmin = user?.is_admin || req.user.isMasterUser;
+    const isAssignedToUser = chore.assigned_to_id === userId;
+
+    if (!isAdmin && !isAssignedToUser) {
+      return res
+        .status(403)
+        .json({ error: "You can only complete chores assigned to you" });
     }
 
     // Mark as completed
@@ -199,10 +215,7 @@ router.post("/:id/complete", async (req, res) => {
       INSERT INTO activity_log (type, description, user_name)
       VALUES ('chore_completed', ?, ?)
     `,
-      [
-        `Completed chore: ${chore.title} (+${chore.points} points)`,
-        chore.assigned_to || "Unknown",
-      ]
+      [`Completed chore: ${chore.title} (+${chore.points} points)`, user.name]
     );
 
     const updatedChore = await db.get(

@@ -168,6 +168,16 @@ class ApiClient {
     });
   }
 
+  async fulfillReward(id: number) {
+    return this.request(`/rewards/${id}/fulfill`, {
+      method: "POST",
+    });
+  }
+
+  async getPendingRedemptions() {
+    return this.request("/rewards/pending-redemptions");
+  }
+
   async deleteReward(id: number) {
     return this.request(`/rewards/${id}`, {
       method: "DELETE",
