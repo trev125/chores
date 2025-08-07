@@ -118,11 +118,46 @@ export async function initializeDatabase(): Promise<void> {
       assigned_to TEXT,
       completed BOOLEAN DEFAULT 0,
       date_completed DATETIME,
+      redeemed_by_id INTEGER,
+      redeemed_at DATETIME,
+      fulfilled BOOLEAN DEFAULT 0,
+      fulfilled_at DATETIME,
+      is_one_time BOOLEAN DEFAULT 1,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (assigned_to_id) REFERENCES persons (id)
+      FOREIGN KEY (assigned_to_id) REFERENCES persons (id),
+      FOREIGN KEY (redeemed_by_id) REFERENCES persons (id)
     )
   `);
+
+  // Add new columns to existing rewards table if they don't exist
+  try {
+    await db.run(`ALTER TABLE rewards ADD COLUMN redeemed_by_id INTEGER`);
+  } catch (e) {
+    // Column already exists
+  }
+  try {
+    await db.run(`ALTER TABLE rewards ADD COLUMN redeemed_at DATETIME`);
+  } catch (e) {
+    // Column already exists
+  }
+  try {
+    await db.run(`ALTER TABLE rewards ADD COLUMN fulfilled BOOLEAN DEFAULT 0`);
+  } catch (e) {
+    // Column already exists
+  }
+  try {
+    await db.run(`ALTER TABLE rewards ADD COLUMN fulfilled_at DATETIME`);
+  } catch (e) {
+    // Column already exists
+  }
+  try {
+    await db.run(
+      `ALTER TABLE rewards ADD COLUMN is_one_time BOOLEAN DEFAULT 1`
+    );
+  } catch (e) {
+    // Column already exists
+  }
 
   // Create activity_log table
   await db.run(`

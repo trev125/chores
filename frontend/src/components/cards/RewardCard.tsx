@@ -35,6 +35,17 @@ const RewardCard: React.FC<RewardCardProps> = ({
               For: {assignedPerson.name}
             </p>
           )}
+          <div className="mt-2">
+            <span
+              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                reward.is_one_time
+                  ? "bg-orange-100 text-orange-800"
+                  : "bg-green-100 text-green-800"
+              }`}
+            >
+              {reward.is_one_time ? "One-time" : "Recurring"}
+            </span>
+          </div>
         </div>
         {showActions && (onRedeem || onDelete) && (
           <div className="ml-4 flex flex-col space-y-2">

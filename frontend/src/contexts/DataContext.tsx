@@ -14,6 +14,7 @@ interface DataContextType {
   chores: Chore[];
   rewards: Reward[];
   activities: ActivityLog[];
+  pendingRedemptions: Reward[];
   loading: boolean;
   error: string | null;
   clearError: () => void;
@@ -26,6 +27,7 @@ interface DataContextType {
   deleteChore: (id: number) => Promise<void>;
   addReward: (data: any) => Promise<void>;
   completeReward: (id: number) => Promise<void>;
+  fulfillReward: (id: number) => Promise<void>;
   deleteReward: (id: number) => Promise<void>;
 }
 
@@ -48,10 +50,11 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [chores, setChores] = useState<Chore[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [activities, setActivities] = useState<ActivityLog[]>([]);
+  const [pendingRedemptions, setPendingRedemptions] = useState<Reward[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   /**
    * Centralised helper for API requests that automatically
@@ -94,8 +97,21 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       setChores(choresData);
       setRewards(rewardsData);
       setActivities(activitiesData);
+
+      // Fetch pending redemptions if user is admin
+      if (user?.is_admin) {
+        try {
+          const pendingData = await apiClient.getPendingRedemptions();
+          setPendingRedemptions(pendingData);
+        } catch (err) {
+          // Not an admin or other error, set empty array
+          setPendingRedemptions([]);
+        }
+      } else {
+        setPendingRedemptions([]);
+      }
     });
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user?.is_admin, handleRequest]);
 
   useEffect(() => {
     refreshData();
@@ -157,6 +173,13 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     });
   };
 
+  const fulfillReward = async (id: number) => {
+    await handleRequest(async () => {
+      await apiClient.fulfillReward(id);
+      await refreshData();
+    });
+  };
+
   const deleteReward = async (id: number) => {
     await handleRequest(async () => {
       await apiClient.deleteReward(id);
@@ -169,6 +192,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     chores,
     rewards,
     activities,
+    pendingRedemptions,
     loading,
     error,
     clearError,
@@ -181,6 +205,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     deleteChore,
     addReward,
     completeReward,
+    fulfillReward,
     deleteReward,
   };
 

@@ -33,11 +33,11 @@ const ChoreCard: React.FC<ChoreCardProps> = ({
               Assigned to: {assignedPerson.name}
             </p>
           )}
-          {chore.is_daily && (
+          {chore.is_daily ? (
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 mt-2">
               Daily
             </span>
-          )}
+          ) : null}
         </div>
         {showActions && (onComplete || onDelete) && (
           <div className="ml-4 flex flex-col space-y-2">

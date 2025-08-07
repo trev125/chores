@@ -7,6 +7,7 @@ interface RewardFormData {
   title: string;
   points_required: number;
   assigned_to_id: number | null;
+  is_one_time: boolean;
 }
 
 interface RewardFormContentProps {
@@ -26,6 +27,7 @@ const RewardFormContent: React.FC<RewardFormContentProps> = ({
     title: initialData?.title || "",
     points_required: initialData?.points_required || 10,
     assigned_to_id: initialData?.assigned_to_id || null,
+    is_one_time: initialData?.is_one_time ?? true,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -96,6 +98,27 @@ const RewardFormContent: React.FC<RewardFormContentProps> = ({
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="flex items-center">
+        <input
+          id="is_one_time"
+          type="checkbox"
+          checked={formData.is_one_time}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              is_one_time: e.target.checked,
+            })
+          }
+          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+        />
+        <label
+          htmlFor="is_one_time"
+          className="ml-2 block text-sm text-gray-700"
+        >
+          One-time reward (can only be redeemed once)
+        </label>
       </div>
 
       <div className="flex space-x-3">
