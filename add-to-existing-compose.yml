@@ -1,0 +1,27 @@
+# Add these services to your existing docker-compose.yml
+
+chores-backend:
+  image: trev125/chores-backend:latest
+  ports:
+    - "3001:3001"
+  environment:
+    - NODE_ENV=production
+    - PORT=3001
+    - DATABASE_PATH=/app/data/database.sqlite
+    - JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+  volumes:
+    - chores-data:/app/data
+  restart: unless-stopped
+
+chores-frontend:
+  image: trev125/chores-frontend:latest
+  ports:
+    - "3000:3000"
+  environment:
+    - API_URL=http://192.168.68.60:3001/api
+  depends_on:
+    - chores-backend
+  restart: unless-stopped
+# Add this to your volumes section
+volumes:
+  chores-data:
